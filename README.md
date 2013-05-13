@@ -20,7 +20,7 @@ The only set
 ```erlang
 Pass = "some secure password!".
 {ok, Hash} = scrypt:hash(Pass).
-true = scrypt:verify().
+true = scrypt:verify(Pass, Hash).
 ```
 
 # Params
