@@ -1,5 +1,6 @@
-
 ebin
+
 .DS_Store
+*.dump
 *.o
 *.so

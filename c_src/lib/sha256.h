@@ -33,6 +33,22 @@
 
 #include <stdint.h>
 
+/*
+ * Use #defines in order to avoid namespace collisions with anyone else's
+ * SHA256 code (e.g., the code in OpenSSL).
+ */
+#define SHA256_Init libcperciva_SHA256_Init
+#define SHA256_Update libcperciva_SHA256_Update
+#define SHA256_Final libcperciva_SHA256_Final
+#define SHA256_Buf libcperciva_SHA256_Buf
+#define SHA256_CTX libcperciva_SHA256_CTX
+#define HMAC_SHA256_Init libcperciva_HMAC_SHA256_Init
+#define HMAC_SHA256_Update libcperciva_HMAC_SHA256_Update
+#define HMAC_SHA256_Final libcperciva_HMAC_SHA256_Final
+#define HMAC_SHA256_Buf libcperciva_HMAC_SHA256_Buf
+#define HMAC_SHA256_CTX libcperciva_HMAC_SHA256_CTX
+#define PBKDF2_SHA256 libcperciva_PBKDF2_SHA256
+
 typedef struct SHA256Context {
 	uint32_t state[8];
 	uint32_t count[2];

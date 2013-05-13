@@ -42,17 +42,25 @@
 #include "lib/scrypt_platform.h"
 #include "lib/scryptenc_cpuperf.h"
 #include "lib/crypto_scrypt.h"
-#include "lib/crypto_aesctr.h"
+#include "lib/params.h"
 #include "lib/sha256.h"
 #include "lib/memlimit.h"
-#include "lib/readpass.h"
 #include "lib/sysendian.h"
 #include "lib/warn.h"
 
+#define HASH_SIZE 96
 
 /* ----------------------------------------------------------------------
  * ERLANG NIF FUNCTIONS
  * ---------------------------------------------------------------------- */
+
+ERL_NIF_TERM
+make_basic_error(ErlNifEnv* env, char * reason) 
+{
+    return enif_make_tuple2(env, 
+                            enif_make_atom(env, "error"), 
+                            enif_make_atom(env, reason));
+}
 
 /*
  * Implementation copied largely from lib/scryptenc/scryptenc.c
@@ -80,26 +88,25 @@ hash(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     int rc;
 
     /* Get password and password length */
-    ErlNifBinary pass_bin;
-    unsigned int pass_len;
+    ErlNifBinary pass_bin;    
     if (!enif_inspect_iolist_as_binary(env, argv[0], &pass_bin))
 		return enif_make_badarg(env);
-    if (!enif_get_uint(env, argv[1], &pass_len))
-		return enif_make_badarg(env);
-
     passwd = (uint8_t *)pass_bin.data;
-    passwdlen = (size_t)pass_len;
+    passwdlen = (size_t)pass_bin.size;
 
     /* Get options */
     int maxmem_int;
-    if (!enif_get_uint(env, argv[2], &maxmem_int))
+    if (!enif_get_int(env, argv[1], &maxmem_int))
 		return enif_make_badarg(env);
-    if (!enif_get_double(env, argv[3], &maxmemfrac))
-		return enif_make_badarg(env);
-    if (!enif_get_double(env, argv[4], &maxtime))
+    maxmem = (size_t)maxmem_int;
+
+    if (!enif_get_double(env, argv[2], &maxmemfrac))
 		return enif_make_badarg(env);
 
-    maxmem = (size_t)maxmem_int;
+    int maxtime_int;
+    if (!enif_get_int(env, argv[3], &maxtime_int))
+		return enif_make_badarg(env);  
+    maxtime = (double)maxtime_int;    
 
     /* Calculate parameters from options */
     if ((rc = pickparams(maxmem, maxmemfrac, maxtime, &logN, &r, &p) != 0))
@@ -124,8 +131,8 @@ hash(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     /* Add header checksum. */
     SHA256_Init(&ctx);
-    scrypt_SHA256_Update(&ctx, header, 48);
-    scrypt_SHA256_Final(hbuf, &ctx);
+    SHA256_Update(&ctx, header, 48);
+    SHA256_Final(hbuf, &ctx);
     memcpy(&header[48], hbuf, 16);
 
     /* Add header signature (used for verifying password). */
@@ -135,19 +142,106 @@ hash(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     memcpy(&header[64], hbuf, 32);
 
     /* RETURN binary */
-    ERL_NIF_TERM hash;
-    memcpy(enif_make_new_binary(env, 96, &hash), header, 96);
-    return hash;
+    ERL_NIF_TERM ret;
+    memcpy(enif_make_new_binary(env, HASH_SIZE, &ret), &header[0], HASH_SIZE);
+    return ret;
 }
 
-//static ERL_NIF_TERM
-//verify_hash(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-//{
-//}
+static ERL_NIF_TERM
+verify(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    /* Get Password and Hash */
+    ErlNifBinary pass;
+	ErlNifBinary hash;
+    if (!enif_inspect_iolist_as_binary(env, argv[0], &pass))
+		return enif_make_badarg(env);
+	if (!enif_inspect_binary(env, argv[1], &hash))
+		return enif_make_badarg(env);
+
+    /* Validate Hash Len */
+    printf("hash size: %zd", hash.size);
+    if (hash.size != HASH_SIZE)
+        return enif_make_atom(env, "false");
+
+    uint8_t * passwd = pass.data;
+    size_t passwdlen = pass.size;
+    uint8_t * header = hash.data;
+
+    /* Get options */
+    size_t maxmem; 
+    double maxmemfrac;
+    double maxtime;
+
+    int maxmem_int;
+    if (!enif_get_int(env, argv[2], &maxmem_int))
+		return enif_make_badarg(env);
+    maxmem = (size_t)maxmem_int;
+
+    if (!enif_get_double(env, argv[3], &maxmemfrac))
+		return enif_make_badarg(env);
+
+    int maxtime_int;
+    if (!enif_get_int(env, argv[4], &maxtime_int))
+		return enif_make_badarg(env);  
+    maxtime = (double)maxtime_int;  
+    
+    /* Rest taken from scryptenc.c */
+    uint8_t salt[32];
+	uint8_t hbuf[32];
+	int logN;
+	uint32_t r;
+	uint32_t p;
+	uint64_t N;
+	SHA256_CTX ctx;
+    uint8_t dk[64];
+	uint8_t * key_hmac = &dk[32];
+	HMAC_SHA256_CTX hctx;
+	int rc;
+
+	/* Parse N, r, p, salt. */
+	logN = header[7];
+	r = be32dec(&header[8]);
+	p = be32dec(&header[12]);
+	memcpy(salt, &header[16], 32);
+    printf("here 0");
+	/* Verify header checksum. */
+	SHA256_Init(&ctx);
+	SHA256_Update(&ctx, header, 48);
+	SHA256_Final(hbuf, &ctx);
+	if (memcmp(&header[48], hbuf, 16))
+		return enif_make_atom(env, "false");
+
+    printf("here 1");
+
+	/*
+	 * Check whether the provided parameters are valid and whether the
+	 * key derivation function can be computed within the allowed memory
+	 * and CPU time.
+	 */
+	if ((rc = checkparams(maxmem, maxmemfrac, maxtime, logN, r, p)) != 0)
+		return enif_make_atom(env, "false");
+    printf("here 2");
+
+	/* Compute the derived keys. */
+	N = (uint64_t)(1) << logN;
+	if (crypto_scrypt(passwd, passwdlen, salt, 32, N, r, p, dk, 64))
+		return enif_make_atom(env, "false");
+    printf("here 3");
+
+	/* Check header signature (i.e., verify password). */
+	HMAC_SHA256_Init(&hctx, key_hmac, 32);
+	HMAC_SHA256_Update(&hctx, header, 64);
+	HMAC_SHA256_Final(hbuf, &hctx);
+
+	if (memcmp(hbuf, &header[64], 32)) // Bad Password
+		return enif_make_atom(env, "false");
+    else 
+        return enif_make_atom(env, "true");
+}
 
 static ErlNifFunc nif_funcs[] = {
-	{"hash", 5, hash}
-	//{"verify_hash", 2, verify_hash}
+	{"hash", 4, hash},
+	{"verify", 5, verify}
 }; 
 
-ERL_NIF_INIT(scrypt, nif_funcs, NULL, NULL, NULL, NULL)
+ERL_NIF_INIT(scrypt_nif, nif_funcs, NULL, NULL, NULL, NULL)

@@ -2,13 +2,13 @@
 {application, scrypt,
  [
   {description, ""},
-  {vsn, "1"},
-  {registered, []},
+  {vsn, "0.0.1"},
+  {registered, [scrypt_sup, scrypt_worker]},
   {applications, [
                   kernel,
                   stdlib,
                   crypto
                  ]},
-  {mod, { scrypt, []}},
+  {mod, {scrypt_app, []}},
   {env, []}
  ]}.
