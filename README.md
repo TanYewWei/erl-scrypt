@@ -15,8 +15,6 @@ Currently, only a rebar build is supported
 
 To test from the shell, run the `shell` script. This should give you an erlang prompt with the scrypt application already started.
 
-The only set 
-
 ```erlang
 Pass = "some secure password!".
 {ok, Hash} = scrypt:hash(Pass).
