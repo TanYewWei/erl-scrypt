@@ -39,6 +39,6 @@ There exists a scrypt:hash/2 function and a scrypt:verify/3 function that takes 
 
 The options include:
 
-* `maxmem` - the maximum number of `bytes` of memory to be used in the operation. Any value less than 1 MB will be treated as 1 MB. **Defaults to 1024**
+* `maxmem` - the maximum number of `bytes` of memory to be used in the operation. Any value less than 1 MB (1048576 bytes) will be treated as 1 MB. **Defaults to 1048576**
 * `maxmemfrac` - the maximum memory to be used as fraction of total available resources. Any value equal to 0 or greater than 0.5 will result in 0.5 being used. **Defaults to 0.5**
 * `maxtime` - the maximum time in `seconds` that the particular operation will take. **Defaults to 1**

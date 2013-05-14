@@ -41,22 +41,22 @@ init() ->
 
 hash_default_options() -> 
     [
-     {maxmem, ?DEFAULT_MAXMEM_MB},
+     {maxmem, ?DEFAULT_MAXMEM_BYTES},
      {maxmemfrac, ?DEFAULT_MAXMEMFRAC},
      {maxtime, ?DEFAULT_MAXTIME_SEC}
     ].
 
 hash( Pass, Options ) ->
-    MaxMem = proplists:get_value( maxmem, Options, ?DEFAULT_MAXMEM_MB ),
+    MaxMem = proplists:get_value( maxmem, Options, ?DEFAULT_MAXMEM_BYTES ),
     MaxMemFrac = proplists:get_value( maxmemfrac, Options, ?DEFAULT_MAXMEMFRAC ),
     MaxTime = proplists:get_value( maxtime, Options, ?DEFAULT_MAXTIME_SEC ),
-    PassBin = iolist_to_binary( Pass ),
+    PassBin = iolist_to_binary( Pass ),    
     hash( PassBin, MaxMem, MaxMemFrac, MaxTime ).
 hash( Pass, MaxMem, MaxMemFrac, MaxTime ) ->
     erlang:nif_error( nif_not_loaded ).
 
 verify( Pass, Hash, Options ) ->
-    MaxMem = proplists:get_value( maxmem, Options, ?DEFAULT_MAXMEM_MB ),
+    MaxMem = proplists:get_value( maxmem, Options, ?DEFAULT_MAXMEM_BYTES ),
     MaxMemFrac = proplists:get_value( maxmemfrac, Options, ?DEFAULT_MAXMEMFRAC ),
     MaxTime = proplists:get_value( maxtime, Options, ?DEFAULT_MAXTIME_SEC ),
     PassBin = iolist_to_binary( Pass ),
