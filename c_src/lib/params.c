@@ -138,6 +138,7 @@ checkparams(size_t maxmem, double maxmemfrac, double maxtime,
 	N = (uint64_t)(1) << logN;
 	if ((memlimit / N) / r < 128)
 		return (9);
+    //printf("opslimits: %f, %llu, %u, %u => %f \n", opslimit, N, r, p, (opslimit / N) / (r * p));
 	if ((opslimit / N) / (r * p) < 4)
 		return (10);
 
