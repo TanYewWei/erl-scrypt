@@ -2,7 +2,7 @@
 {application, scrypt,
  [
   {description, ""},
-  {vsn, "0.0.1"},
+  {vsn, "0.0.2"},
   {registered, [scrypt_sup, scrypt_worker]},
   {applications, [
                   kernel,
