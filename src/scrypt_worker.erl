@@ -69,7 +69,7 @@ handle_call({hash, Pass, Options}, _, State) ->
     {reply, {ok,Hash}, State};
 
 handle_call({verify, Pass, Hash, Options}, _, State) -> 
-    Resolved_Options = resolve_options( Options, State ),
+    Resolved_Options = resolve_options( Options, State, true ),
     Verify = scrypt_nif:verify( Pass, Hash, Resolved_Options ),
     {reply, Verify, State};
 
@@ -79,7 +79,7 @@ handle_call({encrypt, Plaintext, Pass, Options}, _, State) ->
     {reply, {ok,Ciphertext}, State};
 
 handle_call({decrypt, Ciphertext, Pass, Options}, _, State) ->
-    Resolved_Options = resolve_options( Options, State ),
+    Resolved_Options = resolve_options( Options, State, true ),
     Plaintext = scrypt_nif:decrypt( Ciphertext, Pass, Resolved_Options ),
     {reply, {ok,Plaintext}, State};
 
@@ -87,7 +87,7 @@ handle_call(_, _, State) ->
     {reply, ok, State}.
 
 handle_cast({calibrate, Options}, State) ->
-    Resolved = resolve_options( Options, get_options(State) ),
+    Resolved = resolve_options( Options, State ),
     MaxMem = proplists:get_value( maxmem, Resolved ),
     MaxMemFrac = proplists:get_value( maxmemfrac, Resolved ),
     MaxTime = proplists:get_value( maxtime, Resolved ),
@@ -112,11 +112,31 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
-resolve_options( Options, State ) ->
-    Defaults = get_options( State ),
-    lists:ukeymerge( 1, Options, Defaults ). %% prefer Options over Defaults
+-spec resolve_options( Options::scrypt_option(), 
+                       State::term(), 
+                       RelaxMaxTime::boolean() ) 
+                     -> [ scrypt_option() ]. 
 
-get_options( State ) ->
+resolve_options( Options, State ) -> 
+    resolve_options( Options, State, false ).
+resolve_options( Options, State, RelaxMaxTime ) ->
+    %% ${RelaxMaxTime} is set to true
+    %% during decryption and verification operations.
+    %% 
+    %% Note that maxtime is intended as a tunable security parameter
+    %% during encryption/hashing, while it is treated as an upper bound
+    %% during decryption/verification.
+    %% 
+    %% The tarsnap code will throw an error if it thinks the 
+    %% operation will take too long, so there should be little 
+    %% danger in setting a higher value for maxtime.
+    %% 
+    %% However, we still always prefer ${Options} over ${Defaults}
+    %% if ${Options} is supplied
+    Defaults = get_options( State, RelaxMaxTime ),
+    lists:ukeymerge( 1, Options, Defaults ). 
+
+get_options( State, RelaxMaxTime ) ->
     #state{ maxmem=Maxmem,
             maxmemfrac=MaxmemFrac,
             maxtime=MaxTime
@@ -124,5 +144,8 @@ get_options( State ) ->
     [
      {maxmem, Maxmem}, 
      {maxmemfrac, MaxmemFrac},
-     {maxtime, MaxTime}
+     {maxtime, case RelaxMaxTime of 
+                   true -> MaxTime * 3; %% arbitrary value
+                   _    -> MaxTime
+               end}
     ].

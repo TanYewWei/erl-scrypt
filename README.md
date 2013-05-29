@@ -41,4 +41,4 @@ The options include:
 
 * `maxmem` - the maximum number of `bytes` of memory to be used in the operation. Any value less than 1 MB (1048576 bytes) will be treated as 1 MB. **Defaults to 1048576**
 * `maxmemfrac` - the maximum memory to be used as fraction of total available resources. Any value equal to 0 or greater than 0.5 will result in 0.5 being used. **Defaults to 0.125**
-* `maxtime` - the maximum time in `seconds` that the particular operation will take. **Defaults to 1**
+* `maxtime` - the maximum time in `seconds` that the particular operation will take. **Defaults to 5**
