@@ -273,7 +273,6 @@ verify(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
                              maxmemfrac,
                              maxtime ))
         != 0) {
-        printf("bad return: %d\n", rc);
         ret = "false";
     }
     else 

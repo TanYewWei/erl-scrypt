@@ -2,6 +2,7 @@ ebin
 TODO
 
 .DS_Store
+.eunit
 *.dump
 *.o
 *.so

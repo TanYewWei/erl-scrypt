@@ -1,8 +1,8 @@
 %% -*- mode: erlang; erlang-indent-level: 2; indent-tabs-mode: nil -*-
 {application, scrypt,
  [
-  {description, ""},
-  {vsn, "0.0.2"},
+  {description, "Erlang wrapper around Colin Percival's SCrypt library"},
+  {vsn, "1.0.0"},
   {registered, [scrypt_sup, scrypt_worker]},
   {applications, [
                   kernel,

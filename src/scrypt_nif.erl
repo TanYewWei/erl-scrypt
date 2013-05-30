@@ -58,7 +58,7 @@ hash( Pass, Options ) ->
 hash( Pass, MaxMem, MaxMemFrac, MaxTime ) ->
     erlang:nif_error( nif_not_loaded ).
 
-verify( Pass, Hash, Options ) ->
+verify( Hash, Pass, Options ) ->
     {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
     PassBin = iolist_to_binary( Pass ),
     verify( PassBin, 

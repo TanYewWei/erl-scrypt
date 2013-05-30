@@ -39,8 +39,8 @@ hash( Pass, Options ) ->
     Call = {hash, Pass, Options},
     gen_server:call( ?MODULE, Call, infinity ).
 
-verify( Pass, Hash, Options ) -> 
-    Call = {verify, Pass, Hash, Options},
+verify( Hash, Pass, Options ) -> 
+    Call = {verify, Hash, Pass, Options},
     gen_server:call( ?MODULE, Call, infinity ).
 
 calibrate( Options ) ->
@@ -68,20 +68,28 @@ handle_call({hash, Pass, Options}, _, State) ->
     Hash = scrypt_nif:hash( Pass, Resolved_Options ),
     {reply, {ok,Hash}, State};
 
-handle_call({verify, Pass, Hash, Options}, _, State) -> 
+handle_call({verify, Hash, Pass, Options}, _, State) -> 
     Resolved_Options = resolve_options( Options, State, true ),
-    Verify = scrypt_nif:verify( Pass, Hash, Resolved_Options ),
+    Verify = scrypt_nif:verify( Hash, Pass, Resolved_Options ),
     {reply, Verify, State};
 
 handle_call({encrypt, Plaintext, Pass, Options}, _, State) -> 
     Resolved_Options = resolve_options( Options, State ),
-    Ciphertext = scrypt_nif:encrypt( Plaintext, Pass, Resolved_Options ),
-    {reply, {ok,Ciphertext}, State};
+    case scrypt_nif:encrypt( Plaintext, Pass, Resolved_Options ) of
+        {error,Rsn} -> 
+            {reply, {error,Rsn}, State};
+        Ciphertext ->
+            {reply, {ok,Ciphertext}, State}
+    end;
 
 handle_call({decrypt, Ciphertext, Pass, Options}, _, State) ->
     Resolved_Options = resolve_options( Options, State, true ),
-    Plaintext = scrypt_nif:decrypt( Ciphertext, Pass, Resolved_Options ),
-    {reply, {ok,Plaintext}, State};
+    case scrypt_nif:decrypt( Ciphertext, Pass, Resolved_Options ) of 
+        {error,Rsn} -> 
+            {reply, {error,Rsn}, State};
+        Plaintext ->
+            {reply, {ok,Plaintext}, State}
+    end;
 
 handle_call(_, _, State) ->
     {reply, ok, State}.

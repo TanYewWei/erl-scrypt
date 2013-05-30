@@ -35,10 +35,10 @@ hash( Pass, Options ) ->
 %%             -> boolean().
 %% 
 %% @doc verifies that a Hash is derived from the given Password using Options
-verify( Pass, Hash ) ->
-    verify( Pass, Hash, [] ).
-verify( Pass, Hash, Options ) ->
-    scrypt_worker:verify( Pass, Hash, Options ).
+verify( Hash, Pass ) ->
+    verify( Hash, Pass, [] ).
+verify( Hash, Pass, Options ) ->
+    scrypt_worker:verify( Hash, Pass, Options ).
 
 
 %% @spec calibrate( Options::list() ) -> ok | {error, Reason::term()}.
