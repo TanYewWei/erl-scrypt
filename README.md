@@ -1,8 +1,7 @@
 erl-scrypt 
 ==========
 
-erl-scrypt is a simple wrapper around Colin Pervical's [scrypt key derivation function](http://www.tarsnap.com/scrypt.html). It is very alpha software (it doesn't even have tests yet!), and isn't gauranteed to work.
-
+erl-scrypt is a simple wrapper around Colin Pervical's [scrypt key derivation function](http://www.tarsnap.com/scrypt.html). 
 # Building 
 
 Currently, only a rebar build is supported
@@ -11,25 +10,31 @@ Currently, only a rebar build is supported
 ./rebar compile
 ```
 
+To use as a dependency, 
+
 # Usage
 
 To test from the shell, run the `shell` script. This should give you an erlang prompt with the scrypt application already started.
 
 ```erlang
 Pass = "some secure password!".
-{ok, Hash} = scrypt:hash(Pass).
-true = scrypt:verify(Pass, Hash).
+{ok, Hash} = scrypt:hash( Pass ).
+true = scrypt:verify( Hash, Pass ).
+
+{ok, Ciphertext} = scrypt:encrypt( "Hello!", "A Strong Password" ).
+{ok, Plaintext} = scrypt:decrypt( Ciphertext, "A Strong Password" ).
+Plaintext = <<"Hello!">>
 ```
 
-# Params
-
-There exists a scrypt:hash/2 function and a scrypt:verify/3 function that takes an additional options proplist:
+Only 6 functions are exported:
 
 ```erlang
 -spec hash( Pass::iolist(), Options::options() ) -> {ok, Hash::binary()} | {error, Reason::term()}.
--spec verify( Pass::iolist(), Hash::iolist(), Options::options() ) -> {ok, Hash::binary()} | {error, Reason::term()}.
+-spec verify( Hash::iolist(), Pass::iolist(), Options::options() ) -> boolean().
 -spec encrypt( Plaintext::iolist(), Pass::iolist(), Options::options() ) -> {ok, Ciphertext::binary()} | {error, Reason::term()}.
 -spec decrypt( Ciphertext::iolist(), Pass::iolist(), Options::options() ) -> {ok, Plaintext::binary()} | {error, Reason::term()}.
+-spec calibrate( Options::[ option_tuple() ] ) -> ok.
+-spec current_calibration() -> {ok, Options::[ option_tuple() ]} | {error, Reason::term()}.
 
 -type options() :: [ option_tuple() ].
 -type option_tuple() :: {maxmem, integer()} 

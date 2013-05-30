@@ -14,7 +14,7 @@
 %% API
 -export([start_link/0]).
 -export([hash/2, verify/3]).
--export([calibrate/1]).
+-export([calibrate/1, current_calibration/0]).
 -export([encrypt/3, decrypt/3]).
 
 %% gen_server callbacks
@@ -43,10 +43,6 @@ verify( Hash, Pass, Options ) ->
     Call = {verify, Hash, Pass, Options},
     gen_server:call( ?MODULE, Call, infinity ).
 
-calibrate( Options ) ->
-    Cast = {calibrate, Options},
-    gen_server:cast( ?MODULE, Cast ).
-
 encrypt( Plaintext, Pass, Options ) ->
     Call = {encrypt, Plaintext, Pass, Options},
     gen_server:call( ?MODULE, Call, infinity ).
@@ -54,6 +50,14 @@ encrypt( Plaintext, Pass, Options ) ->
 decrypt( Ciphertext, Pass, Options ) ->
     Call = {decrypt, Ciphertext, Pass, Options},
     gen_server:call( ?MODULE, Call, infinity ).
+
+calibrate( Options ) ->
+    Cast = {calibrate, Options},
+    gen_server:cast( ?MODULE, Cast ).
+
+current_calibration() -> 
+    Call = {current_calibration},
+    gen_server:call( ?MODULE, Call ).
 
 
 %%%===================================================================
@@ -90,6 +94,9 @@ handle_call({decrypt, Ciphertext, Pass, Options}, _, State) ->
         Plaintext ->
             {reply, {ok,Plaintext}, State}
     end;
+
+handle_call({current_calibration}, _, State) ->
+    {reply, {ok, get_options(State, false)}, State};
 
 handle_call(_, _, State) ->
     {reply, ok, State}.
