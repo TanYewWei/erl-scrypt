@@ -10,7 +10,11 @@ Currently, only a rebar build is supported
 ./rebar compile
 ```
 
-To use as a dependency, 
+To use as a dependency, add the following line to your `rebar.config`
+
+```erlang
+{deps, [{scrypt, "1.0.0", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.0.0"}}}]}
+```
 
 # Usage
 
