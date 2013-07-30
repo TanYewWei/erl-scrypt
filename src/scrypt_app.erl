@@ -17,7 +17,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    scrypt_sup:start_link().
+    scrypt:start().
 
 stop(_State) ->
-    ok.
+    scrypt:stop().

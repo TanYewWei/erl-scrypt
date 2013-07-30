@@ -12,21 +12,17 @@
 
 hash_and_verify_test_() ->
     {setup,
-     fun()  -> scrypt:start() end,
-     fun(_) -> scrypt:stop() end,
+     fun() -> ok end,
+     fun(_) -> ok end,
      [
-      {"hashing and verifying passwords should work", 
+      {timeout, 60, {"hashing and verifying passwords should work",
        fun() -> 
-               scrypt:calibrate([ {maxtime,0.5} ]),
-
                %% Hash
                {ok,A0} = scrypt:hash( "test password 0" ),
                {ok,A1} = scrypt:hash( "test password 1", 
-                                      [
-                                       {maxmemfrac, 0.5},
-                                       {maxtime, 1.0},
-                                       {maxmem, 1024}
-                                      ]),
+                                      [ {maxmemfrac, 0.5},
+                                        {maxtime, 1.0},
+                                        {maxmem, 1024} ]),
 
                %% Verify                              
                ?assert(scrypt:verify( A0, "test password 0" )),
@@ -34,28 +30,24 @@ hash_and_verify_test_() ->
                                       "test password 1",
                                       [{maxtime, 2.0}] )),
                ?assert(not scrypt:verify( A0, "test pass 0" ))
-       end}
+       end}}
      ]}.
 
 encrypt_and_decrypt_test_() -> 
     {setup,
-     fun()  -> scrypt:start() end,
-     fun(_) -> scrypt:stop() end,
+     fun() -> ok end,
+     fun(_) -> ok end,
      [
-      {"encrypting and decrypting passwords should work", 
+      {timeout, 60, {"encrypting and decrypting passwords should work", 
        fun() -> 
-               scrypt:calibrate([ {maxtime,0.5} ]),
-               
                %% encrypt
                {ok,A0} = scrypt:encrypt( "encrypt me 0!", 
                                          "test password 0" ),
                {ok,A1} = scrypt:encrypt( "encrypt me 1!", 
                                          "test password 1", 
-                                         [
-                                          {maxmemfrac, 0.5},
-                                          {maxtime, 1.0},
-                                          {maxmem, 1024}
-                                         ]),
+                                         [ {maxmemfrac, 0.5},
+                                           {maxtime, 1.0},
+                                           {maxmem, 1024} ]),
                
                %% decrypt 
                ?assertEqual( {ok,<<"encrypt me 0!">>}, 
@@ -66,5 +58,5 @@ encrypt_and_decrypt_test_() ->
                              scrypt:decrypt( A1, "test password 1" )),
                ?assertMatch( {error,_}, 
                              scrypt:decrypt( A1, "test password 0" ))
-       end}
+       end}}
      ]}.

@@ -2,13 +2,11 @@
 {application, scrypt,
  [
   {description, "Erlang wrapper around Colin Percival's SCrypt library"},
-  {vsn, "1.0.0"},
+  {vsn, "1.1.0"},
   {registered, [scrypt_sup, scrypt_worker]},
-  {applications, [
-                  kernel,
-                  stdlib,
-                  crypto
-                 ]},
+  {applications, [ kernel,
+                   stdlib,
+                   crypto ]},
   {mod, {scrypt_app, []}},
   {env, []}
  ]}.

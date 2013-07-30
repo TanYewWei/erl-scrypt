@@ -13,7 +13,7 @@ Currently, only a rebar build is supported
 To use as a dependency, add the following line to your `rebar.config`
 
 ```erlang
-{deps, [{scrypt, "1.0.0", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.0.0"}}}]}
+{deps, [{scrypt, "1.1.0", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.1.0"}}}]}
 ```
 
 # Usage
@@ -37,8 +37,6 @@ Only 6 functions are exported:
 -spec verify( Hash::iolist(), Pass::iolist(), Options::options() ) -> boolean().
 -spec encrypt( Plaintext::iolist(), Pass::iolist(), Options::options() ) -> {ok, Ciphertext::binary()} | {error, Reason::term()}.
 -spec decrypt( Ciphertext::iolist(), Pass::iolist(), Options::options() ) -> {ok, Plaintext::binary()} | {error, Reason::term()}.
--spec calibrate( Options::[ option_tuple() ] ) -> ok.
--spec current_calibration() -> {ok, Options::[ option_tuple() ]} | {error, Reason::term()}.
 
 -type options() :: [ option_tuple() ].
 -type option_tuple() :: {maxmem, integer()} 

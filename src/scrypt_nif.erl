@@ -10,7 +10,6 @@
 -include("scrypt.hrl").
 
 -export([init/0]).
--export([hash_default_options/0]).
 -export([hash/2, verify/3]).
 -export([encrypt/3, decrypt/3]).
 
@@ -31,65 +30,75 @@ init() ->
             Format = ?MODULE_STRING ++ " load NIF failed:~n~p~n",
             error_logger:warning_msg( Format, [Reason] ),
             throw({error, Reason});
-        {error, {reload, _}} -> 
+        {error, {reload, _}} ->
             ok;
-        ok -> 
-            %%error_logger:warning_msg( "scrypt loaded~n" ),
+        ok ->
             ok;
-        Err -> 
+        Err ->
             error_logger:warning_msg( "scrypt load error: ~p~n", [Err] ),
             throw({error, Err})
     end.
 
-hash_default_options() -> 
-    [
-     {maxmem, ?DEFAULT_MAXMEM_BYTES},
-     {maxmemfrac, ?DEFAULT_MAXMEMFRAC},
-     {maxtime, ?DEFAULT_MAXTIME_SEC}
-    ].
 
+%% @spec hash( Pass::iolist(), Options::list() )
+%%           -> {ok, Hash::binary()} | {error,Reason::term()}.
+%%
 hash( Pass, Options ) ->
     {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    PassBin = iolist_to_binary( Pass ),    
-    hash( PassBin, 
+    hash( iolist_to_binary(Pass), 
           MaxMem, 
           float(MaxMemFrac), 
           float(MaxTime) ).
+
 hash( Pass, MaxMem, MaxMemFrac, MaxTime ) ->
     erlang:nif_error( nif_not_loaded ).
 
+
+%% @spec verify( Hash::iolist(), Password::iolist(), Options::list() )
+%%             -> boolean().
+%%
 verify( Hash, Pass, Options ) ->
     {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    PassBin = iolist_to_binary( Pass ),
-    verify( PassBin, 
-            MaxMem, 
+    verify( iolist_to_binary(Pass), 
+            MaxMem,
             float(MaxMemFrac), 
             float(MaxTime),
-            Hash ).
+            iolist_to_binary(Hash) ).
+
 verify( Pass, MaxMem, MaxMemFrac, MaxTime, Hash ) ->
     erlang:nif_error( nif_not_loaded ).
 
+%% @spec encrypt( 
+%%         Plaintext::iolist(),
+%%         Pass::iolist(),
+%%         Options::list()
+%%       ) -> {ok, Ciphertext::binary()} | {error, Reason::term()}.
+%% 
 encrypt( Plaintext, Pass, Options ) -> 
     {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    PlaintextBin = iolist_to_binary( Plaintext ),
-    PassBin = iolist_to_binary( Pass ),
-    encrypt( PassBin,
+    encrypt( iolist_to_binary(Pass),
              MaxMem,
              float(MaxMemFrac),
              float(MaxTime),
-             PlaintextBin ).
+             iolist_to_binary(Plaintext) ).
+
 encrypt( Pass, MaxMem, MaxMemFrac, MaxTime, Plaintext ) -> 
     erlang:nif_error( nif_not_loaded ).
 
+%% @spec decrypt( 
+%%         Ciphertext::iolist(),
+%%         Pass::iolist(),
+%%         Options::list()
+%%       ) -> {ok, Plaintext::binary()} | {error, Reason::term()}.
+%%
 decrypt( Ciphertext, Pass, Options ) -> 
     {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    CiphertextBin = iolist_to_binary( Ciphertext ),
-    PassBin = iolist_to_binary( Pass ),
-    decrypt( PassBin,
+    decrypt( iolist_to_binary(Pass),
              MaxMem,
              float(MaxMemFrac), 
              float(MaxTime), 
-             CiphertextBin ).
+             iolist_to_binary(Ciphertext) ).
+
 decrypt( Pass, MaxMem, MaxMemFrac, MaxTime, Ciphertext ) -> 
     erlang:nif_error( nif_not_loaded ).
 

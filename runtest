@@ -1,0 +1,4 @@
+#! /usr/bin/env bash
+
+## Start the scrypt application before tests are run
+ERL_FLAGS="-s crypto -s scrypt" ./rebar eunit

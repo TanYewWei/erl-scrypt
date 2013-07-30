@@ -67,6 +67,14 @@ basic_error(ErlNifEnv * env, char * reason)
                              enif_make_atom(env, reason));
 }
 
+ERL_NIF_TERM
+success_return(ErlNifEnv * env, ERL_NIF_TERM ret)
+{
+    return enif_make_tuple2( env, 
+                             enif_make_atom(env, "ok"),
+                             ret );
+}
+
 int 
 hash_worker( uint8_t header[96],
              uint8_t dk[64],
@@ -150,7 +158,6 @@ verify_worker( const uint8_t header[96],
 	r = be32dec(&header[8]);
 	p = be32dec(&header[12]);
 	memcpy(salt, &header[16], 32);
-    //printf("N, r, p: %llu %u %u \n", N, r, p);
 
 	/* Verify header checksum. */
 	SHA256_Init(&ctx);
@@ -239,7 +246,7 @@ hash(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     memcpy(enif_make_new_binary(env, HASH_SIZE, &ret), &hash[0], HASH_SIZE);
 
     free(options);
-    return ret;
+    return success_return(env, ret);
 }
 
 static ERL_NIF_TERM
@@ -256,7 +263,7 @@ verify(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     /* Get Hash */
 	ErlNifBinary hash;
 	if (!enif_inspect_binary(env, argv[4], &hash))
-		return enif_make_badarg(env);
+		return enif_make_atom(env, "false");
     if (hash.size != HASH_SIZE)
         return enif_make_atom(env, "false");
     uint8_t * header = hash.data;
@@ -299,7 +306,7 @@ scrypt_encrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     /* Get plaintext */
     ErlNifBinary plaintext_bin;
     if (!enif_inspect_iolist_as_binary(env, argv[4], &plaintext_bin))
-		return enif_make_badarg(env);
+		return basic_error(env, "badarg");
     plaintext = plaintext_bin.data;
     plaintext_len = plaintext_bin.size;        
 
@@ -325,9 +332,9 @@ scrypt_encrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
 
 	/* Encrypt data. */
 	if (AES_set_encrypt_key(key_enc, 256, &key_enc_exp))
-		return (5);
+		return basic_error(env, "failed_set_aes_key");
 	if ((AES = crypto_aesctr_init(&key_enc_exp, 0)) == NULL)
-		return (6);
+		return basic_error(env, "failed_aesctr_enc");
 	crypto_aesctr_stream(AES, plaintext, &outbuf[96], plaintext_len);
 	crypto_aesctr_free(AES);
 
@@ -346,7 +353,7 @@ scrypt_encrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     memcpy(enif_make_new_binary(env, outlen, &ret), &outbuf, outlen);
     
     free(options);
-    return ret;
+    return success_return(env, ret);
 }
 
 static ERL_NIF_TERM
@@ -383,15 +390,15 @@ scrypt_decrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
 	 * have at least 7 bytes of header.
 	 */
 	if ((inbuflen < 7) || (memcmp(inbuf, "scrypt", 6) != 0))
-		return (7);
+		return basic_error(env, "invalid_header");
 
 	/* Check the format. */
 	if (inbuf[6] != 0)
-		return (8);
+		return basic_error(env, "invalid_header_bytes");
 
 	/* We must have at least 128 bytes. */
 	if (inbuflen < 128)
-		return (7);
+		return basic_error(env, "header_too_short");
 
 	/* Parse the header and generate derived keys. */
 	if (verify_worker( inbuf, 
@@ -408,9 +415,9 @@ scrypt_decrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     size_t outlen = inbuflen - 128;
     uint8_t outbuf[ outlen ]; 
 	if (AES_set_encrypt_key(key_enc, 256, &key_enc_exp))
-		return (5);
+		return basic_error(env, "failed_set_enc_key");
 	if ((AES = crypto_aesctr_init(&key_enc_exp, 0)) == NULL)
-		return (6);
+		return basic_error(env, "failed_aesctr_enc");
 	crypto_aesctr_stream(AES, &inbuf[96], outbuf, outlen);
 	crypto_aesctr_free(AES);	
 
@@ -419,7 +426,7 @@ scrypt_decrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
 	HMAC_SHA256_Update(&hctx, inbuf, inbuflen - 32);
 	HMAC_SHA256_Final(hbuf, &hctx);
 	if (memcmp(hbuf, &inbuf[inbuflen - 32], 32))
-		return (7);
+		return basic_error(env, "failed_verify_signature");
 
 	/* Zero sensitive data. */
 	memset(dk, 0, 64);
@@ -430,7 +437,7 @@ scrypt_decrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     memcpy(enif_make_new_binary(env, outlen, &ret), &outbuf, outlen);
 
     free(options);
-    return ret;
+    return success_return(env, ret);
 }
 
 static ErlNifFunc nif_funcs[] = {
