@@ -27,7 +27,18 @@ true = scrypt:verify( Hash, Pass ).
 
 {ok, Ciphertext} = scrypt:encrypt( "Hello!", "A Strong Password" ).
 {ok, Plaintext} = scrypt:decrypt( Ciphertext, "A Strong Password" ).
-Plaintext = <<"Hello!">>
+Plaintext = <<"Hello!">>.
+
+%% With options
+Options = [{maxmem, 1024}, {maxmemfrac,0.2}, {maxtime,1.0}].
+
+P0 = "another secure password!".
+{ok, H0} = scrypt:hash( P0, Options ).
+true = scrypt:verify( H0, P0, Options ).
+
+{ok, C0} = scrypt:encrypt( "Hello Again!", "Another Strong Password", Options ).
+{ok, T0} = scrypt:decrypt( C0, "Another Strong Password", Options ).
+T0 = <<"Hello Again!">>.
 ```
 
 Only 6 functions are exported:
