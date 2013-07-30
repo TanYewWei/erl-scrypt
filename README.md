@@ -41,7 +41,7 @@ true = scrypt:verify( H0, P0, Options ).
 T0 = <<"Hello Again!">>.
 ```
 
-Only 6 functions are exported:
+Only 4 functions are exported:
 
 ```erlang
 -spec hash( Pass::iolist(), Options::options() ) -> {ok, Hash::binary()} | {error, Reason::term()}.
