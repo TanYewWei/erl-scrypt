@@ -16,6 +16,12 @@ To use as a dependency, add the following line to your `rebar.config`
 {deps, [{scrypt, "1.1.0", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.1.0"}}}]}
 ```
 
+As a dependency on elixir projects, add the following tuple to the `deps:` keyword of your `mix.exs`
+
+```elixir
+{ :scrypt, github: "TanYewWei/erl-scrypt" }
+```
+
 # Usage
 
 To test from the shell, run the `shell` script. This should give you an erlang prompt with the scrypt application already started.
