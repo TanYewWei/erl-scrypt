@@ -13,9 +13,7 @@ fi
 ## Operate out of the scrypt config dir
 ## (This is obviously a hack, 
 ## and the configure script expects relative paths)
-cd $CONFIG_DIR
-./configure
-cd $PWD
+(cd $CONFIG_DIR && exec $CONFIG_DIR/configure)
 
 ## Copy config.h
 cp $CONFIG_DIR/config.h $LIB_DIR
