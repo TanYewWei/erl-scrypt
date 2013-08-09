@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+PWD=$(pwd)
+LIB_DIR=$PWD/c_src/lib
+CONFIG=$PWD/c_src/lib/config.h
+
+if [ -e $CONFIG ]; then
+    rm $CONFIG
+fi

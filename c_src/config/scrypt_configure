@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+PWD=$(pwd)
+CONFIG_DIR=$PWD/c_src/config
+LIB_DIR=$PWD/c_src/lib
+
+## Only generate file if needed
+if [ -e $LIB_DIR/config.h ]; then
+    echo "scrypt already configured: $LIB_DIR/config.h"
+    exit 0
+fi
+
+## Operate out of the scrypt config dir
+## (This is obviously a hack, 
+## and the configure script expects relative paths)
+cd $CONFIG_DIR
+./configure
+cd $PWD
+
+## Copy config.h
+cp $CONFIG_DIR/config.h $LIB_DIR
