@@ -13,13 +13,13 @@ Currently, only a rebar build is supported
 To use as a dependency, add the following line to your `rebar.config`
 
 ```erlang
-{deps, [{scrypt, "1.1.0", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.1.0"}}}]}
+{deps, [{scrypt, "1.1.1", {git, "https://github.com/TanYewWei/erl-scrypt.git", {tag, "1.1.1"}}}]}
 ```
 
 As a dependency on elixir projects, add the following tuple to the `deps:` keyword of your `mix.exs`
 
 ```elixir
-{ :scrypt, github: "TanYewWei/erl-scrypt" }
+{ :scrypt, github: "TanYewWei/erl-scrypt", tag: "1.1.1" }
 ```
 
 # Dependencies
