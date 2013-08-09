@@ -22,6 +22,20 @@ As a dependency on elixir projects, add the following tuple to the `deps:` keywo
 { :scrypt, github: "TanYewWei/erl-scrypt" }
 ```
 
+# Dependencies
+
+The following are required to build the scrypt utility:
+
+* gcc
+* make
+* libssl-dev
+
+Ubuntu and Debian users can install the dependencies via the command 
+
+```
+sudo apt-get install gcc make libssl-dev
+```
+
 # Usage
 
 To test from the shell, run the `shell` script. This should give you an erlang prompt with the scrypt application already started.
