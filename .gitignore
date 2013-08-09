@@ -7,11 +7,11 @@ TODO
 *.o
 *.so
 *#
+.deps
 
 # Ignore generated scrypt config files
 c_src/lib/config.h
-c_src/config
-c_src/.deps
+c_src/config/*
 !c_src/config/config.aux
 !c_src/config/config.h.in
 !c_src/config/configure
