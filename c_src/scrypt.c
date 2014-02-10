@@ -409,7 +409,7 @@ scrypt_decrypt(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
                        maxmemfrac,
                        maxtime) 
         != 0)
-		return basic_error(env, "verify_worker_failed");
+		return basic_error(env, "invalid scrypt header or parameters");
 
 	/* Decrypt data. */
     size_t outlen = inbuflen - 128;

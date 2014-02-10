@@ -28,7 +28,7 @@ init() ->
     case erlang:load_nif( So, 0 ) of
         {error, {load_failed, Reason}} ->
             Format = ?MODULE_STRING ++ " load NIF failed:~n~p~n",
-            error_logger:warning_msg( Format, [Reason] ),
+            error_logger:warning_msg(Format, [Reason]),
             throw({error, Reason});
         {error, {reload, _}} ->
             ok;
@@ -40,33 +40,33 @@ init() ->
     end.
 
 
-%% @spec hash( Pass::iolist(), Options::list() )
+%% @spec hash(Pass::iolist(), Options::list())
 %%           -> {ok, Hash::binary()} | {error,Reason::term()}.
 %%
-hash( Pass, Options ) ->
-    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    hash( iolist_to_binary(Pass), 
-          MaxMem, 
-          float(MaxMemFrac), 
-          float(MaxTime) ).
+hash(Pass, Options) ->
+    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple(Options),
+    hash(iolist_to_binary(Pass), 
+         MaxMem, 
+         float(MaxMemFrac), 
+         float(MaxTime)).
 
-hash( Pass, MaxMem, MaxMemFrac, MaxTime ) ->
-    erlang:nif_error( nif_not_loaded ).
+hash(_Pass, _MaxMem, _MaxMemFrac, _MaxTime) ->
+    erlang:nif_error(nif_not_loaded).
 
 
-%% @spec verify( Hash::iolist(), Password::iolist(), Options::list() )
+%% @spec verify(Hash::iolist(), Password::iolist(), Options::list())
 %%             -> boolean().
 %%
-verify( Hash, Pass, Options ) ->
-    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    verify( iolist_to_binary(Pass), 
-            MaxMem,
-            float(MaxMemFrac), 
-            float(MaxTime),
-            iolist_to_binary(Hash) ).
+verify(Hash, Pass, Options) ->
+    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple(Options),
+    verify(iolist_to_binary(Pass), 
+           MaxMem,
+           float(MaxMemFrac), 
+           float(MaxTime),
+           iolist_to_binary(Hash)).
 
-verify( Pass, MaxMem, MaxMemFrac, MaxTime, Hash ) ->
-    erlang:nif_error( nif_not_loaded ).
+verify(_Pass, _MaxMem, _MaxMemFrac, _MaxTime, _Hash) ->
+    erlang:nif_error(nif_not_loaded).
 
 %% @spec encrypt( 
 %%         Plaintext::iolist(),
@@ -74,16 +74,16 @@ verify( Pass, MaxMem, MaxMemFrac, MaxTime, Hash ) ->
 %%         Options::list()
 %%       ) -> {ok, Ciphertext::binary()} | {error, Reason::term()}.
 %% 
-encrypt( Plaintext, Pass, Options ) -> 
-    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    encrypt( iolist_to_binary(Pass),
-             MaxMem,
-             float(MaxMemFrac),
-             float(MaxTime),
-             iolist_to_binary(Plaintext) ).
+encrypt(Plaintext, Pass, Options) -> 
+    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple(Options),
+    encrypt(iolist_to_binary(Pass),
+            MaxMem,
+            float(MaxMemFrac),
+            float(MaxTime),
+            iolist_to_binary(Plaintext)).
 
-encrypt( Pass, MaxMem, MaxMemFrac, MaxTime, Plaintext ) -> 
-    erlang:nif_error( nif_not_loaded ).
+encrypt(_Pass, _MaxMem, _MaxMemFrac, _MaxTime, _Plaintext) -> 
+    erlang:nif_error(nif_not_loaded).
 
 %% @spec decrypt( 
 %%         Ciphertext::iolist(),
@@ -91,24 +91,24 @@ encrypt( Pass, MaxMem, MaxMemFrac, MaxTime, Plaintext ) ->
 %%         Options::list()
 %%       ) -> {ok, Plaintext::binary()} | {error, Reason::term()}.
 %%
-decrypt( Ciphertext, Pass, Options ) -> 
-    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple( Options ),
-    decrypt( iolist_to_binary(Pass),
-             MaxMem,
-             float(MaxMemFrac), 
-             float(MaxTime), 
-             iolist_to_binary(Ciphertext) ).
+decrypt(Ciphertext, Pass, Options) -> 
+    {MaxMem, MaxMemFrac, MaxTime} = get_options_tuple(Options),
+    decrypt(iolist_to_binary(Pass),
+            MaxMem,
+            float(MaxMemFrac), 
+            float(MaxTime), 
+            iolist_to_binary(Ciphertext)).
 
-decrypt( Pass, MaxMem, MaxMemFrac, MaxTime, Ciphertext ) -> 
-    erlang:nif_error( nif_not_loaded ).
+decrypt(_Pass, _MaxMem, _MaxMemFrac, _MaxTime, _Ciphertext) -> 
+    erlang:nif_error(nif_not_loaded).
 
 
 %% ----------------------------------------------------------------------
 %% PRIVATE
 %% ----------------------------------------------------------------------
 
-get_options_tuple( Options ) ->
-    MaxMem = proplists:get_value( maxmem, Options, ?DEFAULT_MAXMEM_BYTES ),
-    MaxMemFrac = proplists:get_value( maxmemfrac, Options, ?DEFAULT_MAXMEMFRAC ),
-    MaxTime = proplists:get_value( maxtime, Options, ?DEFAULT_MAXTIME_SEC ),
+get_options_tuple(Options) ->
+    MaxMem = proplists:get_value(maxmem, Options, ?DEFAULT_MAXMEM_BYTES),
+    MaxMemFrac = proplists:get_value(maxmemfrac, Options, ?DEFAULT_MAXMEMFRAC),
+    MaxTime = proplists:get_value(maxtime, Options, ?DEFAULT_MAXTIME_SEC),
     {MaxMem, MaxMemFrac, MaxTime}.

@@ -19,29 +19,29 @@
 %%%===================================================================
 
 start() ->
-    application:start( scrypt ).
+    application:start(scrypt).
 
 stop() ->
-    application:stop( scrypt ).
+    application:stop(scrypt).
 
 %% @spec hash( Pass::iolist(), Options::list() )
 %%           -> {ok, Hash::binary()} | {error,Reason::term()}.
 %% 
-hash( Pass ) ->
-    hash( Pass, ?DEFAULT_OPTIONS ).
-hash( Pass, Options ) ->
-    ResolvedOptions = resolve_options( Options ),
-    scrypt_nif:hash( Pass, ResolvedOptions ).
+hash(Pass) ->
+    hash(Pass, ?DEFAULT_OPTIONS).
+hash(Pass, Options) ->
+    ResolvedOptions = resolve_options(Options),
+    scrypt_nif:hash(Pass, ResolvedOptions).
 
 
 %% @spec verify( Hash::binary(), Password::iolist(), Options::list() ) 
 %%             -> boolean().
 %% 
-verify( Hash, Pass ) ->
-    verify( Hash, Pass, [] ).
-verify( Hash, Pass, Options ) ->
-    ResolvedOptions = resolve_options( Options, true ),
-    scrypt_nif:verify( Hash, Pass, ResolvedOptions ).
+verify(Hash, Pass) ->
+    verify(Hash, Pass, []).
+verify(Hash, Pass, Options) ->
+    ResolvedOptions = resolve_options(Options, true),
+    scrypt_nif:verify(Hash, Pass, ResolvedOptions).
 
 
 %% @spec encrypt( 
@@ -50,11 +50,11 @@ verify( Hash, Pass, Options ) ->
 %%         Options::list()
 %%       ) -> {ok, Ciphertext::binary()} | {error, Reason::term()}.
 %%
-encrypt( Plaintext, Pass ) ->
-    encrypt( Plaintext, Pass, [] ).
-encrypt( Plaintext, Pass, Options ) ->
-    ResolvedOptions = resolve_options( Options ),
-    scrypt_nif:encrypt( Plaintext, Pass, ResolvedOptions ).
+encrypt(Plaintext, Pass) ->
+    encrypt(Plaintext, Pass, []).
+encrypt(Plaintext, Pass, Options) ->
+    ResolvedOptions = resolve_options(Options),
+    scrypt_nif:encrypt(Plaintext, Pass, ResolvedOptions).
 
 
 %% @spec decrypt( 
@@ -63,25 +63,25 @@ encrypt( Plaintext, Pass, Options ) ->
 %%         Options::list()
 %%       ) -> {ok, Plaintext::binary()} | {error, Reason::term()}.
 %%
-decrypt( Ciphertext, Pass ) ->
-    decrypt( Ciphertext, Pass, [] ).
-decrypt( Ciphertext, Pass, Options ) ->
-    ResolvedOptions = resolve_options( Options, true ),
-    scrypt_nif:decrypt( Ciphertext, Pass, ResolvedOptions ).
+decrypt(Ciphertext, Pass) ->
+    decrypt(Ciphertext, Pass, []).
+decrypt(Ciphertext, Pass, Options) ->
+    ResolvedOptions = resolve_options(Options, true),
+    scrypt_nif:decrypt(Ciphertext, Pass, ResolvedOptions).
 
 
 %%%-------------------------------------------------------------------
 %%% Private
 %%%-------------------------------------------------------------------
 
--spec resolve_options( Options::scrypt_option(),
-                       RelaxMaxTime::boolean() ) 
+-spec resolve_options(Options::scrypt_option(),
+                      RelaxMaxTime::boolean())
                      -> [ scrypt_option() ].
 
-resolve_options( Options ) ->
-    resolve_options( Options, false ).
+resolve_options(Options) ->
+    resolve_options(Options, false).
 
-resolve_options( Options, RelaxMaxTime ) ->
+resolve_options(Options, RelaxMaxTime) ->
     %% ${RelaxMaxTime} is set to true
     %% during decryption and verification operations.
     %% 
@@ -95,11 +95,11 @@ resolve_options( Options, RelaxMaxTime ) ->
     %% 
     %% However, we still always prefer ${Options} over ${Defaults}
     %% if ${Options} is supplied
-    InputMaxTime = proplists:get_value( maxtime, Options, ?DEFAULT_MAXTIME_SEC ),
+    InputMaxTime = proplists:get_value(maxtime, Options, ?DEFAULT_MAXTIME_SEC),
     MaxTime = case RelaxMaxTime of
                   true -> InputMaxTime * 3;  %% arbitrary multiplier
                   _    -> InputMaxTime
               end,
-    R0 = lists:ukeymerge( 1, Options, ?DEFAULT_OPTIONS ),
-    R1 = lists:ukeymerge( 1, [{maxtime,MaxTime}], R0 ),
+    R0 = lists:ukeymerge(1, Options, ?DEFAULT_OPTIONS),
+    R1 = lists:ukeymerge(1, [{maxtime,MaxTime}], R0),
     R1.
