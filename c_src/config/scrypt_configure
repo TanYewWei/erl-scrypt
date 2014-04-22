@@ -2,18 +2,17 @@
 
 PWD=$(pwd)
 CONFIG_DIR=$PWD/c_src/config
-LIB_DIR=$PWD/c_src/lib
 
-## Only generate file if needed
-if [ -e $LIB_DIR/config.h ]; then
-    echo "scrypt already configured: $LIB_DIR/config.h"
+if [ -e $CONFIG_DIR/config.h ]; then
+    echo "scrypt already configured"
     exit 0
 fi
 
 ## Operate out of the scrypt config dir
 ## (This is obviously a hack, 
 ## and the configure script expects relative paths)
-(cd $CONFIG_DIR && exec $CONFIG_DIR/configure)
+(cd $CONFIG_DIR && exec $CONFIG_DIR/configure) >
 
-## Copy config.h
-cp $CONFIG_DIR/config.h $LIB_DIR
+## Copy config.h to current dir. 
+## This config file will be removed during rebar post hooks
+cp $CONFIG_DIR/config.h $PWD

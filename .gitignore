@@ -10,11 +10,12 @@ TODO
 .deps
 
 # Ignore generated scrypt config files
-c_src/lib/config.h
+config.h
 c_src/config/*
 !c_src/config/config.aux
 !c_src/config/config.h.in
 !c_src/config/configure
 !c_src/config/scrypt_clean
 !c_src/config/scrypt_configure
+!c_src/config/scrypt_configure_post
 !c_src/config/Makefile.in

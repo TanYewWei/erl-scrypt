@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+CONFIG=$(pwd)/config.h
+
+if [ -e $CONFIG ]; then
+    rm $CONFIG
+fi

@@ -30,7 +30,10 @@
  * SUCH DAMAGE.
  */
 
-#include <erl_nif.h>
+#ifndef ERLANG_SCRYPT_NIF_H
+#define ERLANG_SCRYPT_NIF_H
+
+#include "erl_nif.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -448,3 +451,5 @@ static ErlNifFunc nif_funcs[] = {
 }; 
 
 ERL_NIF_INIT(scrypt_nif, nif_funcs, NULL, NULL, NULL, NULL)
+
+#endif // ERLANG_SCRYPT_NIF_H

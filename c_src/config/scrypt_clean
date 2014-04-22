@@ -2,8 +2,8 @@
 
 PWD=$(pwd)
 LIB_DIR=$PWD/c_src/lib
-CONFIG=$PWD/c_src/lib/config.h
+CONFIG=$PWD/config.h
 
 if [ -e $CONFIG ]; then
-    rm $CONFIG
+    rm $PWD/config.h
 fi
