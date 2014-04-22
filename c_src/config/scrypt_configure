@@ -11,7 +11,7 @@ fi
 ## Operate out of the scrypt config dir
 ## (This is obviously a hack, 
 ## and the configure script expects relative paths)
-(cd $CONFIG_DIR && exec $CONFIG_DIR/configure) >
+(cd $CONFIG_DIR && exec $CONFIG_DIR/configure) >/dev/null
 
 ## Copy config.h to current dir. 
 ## This config file will be removed during rebar post hooks
